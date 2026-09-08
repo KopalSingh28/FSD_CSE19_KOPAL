@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Management System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #eeeeee;
+            color: #222;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1050px;
+            margin: 25px auto;
+            background-color: white;
+            padding: 25px;
+            border: 1px solid #aaa;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 9px;
+            border: 1px solid #888;
+            font-size: 14px;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        #addBtn {
+            width: 100%;
+            padding: 10px;
+            background-color: #4a7c59;
+            color: white;
+            border: none;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        #addBtn:hover {
+            background-color: #3d684a;
+        }
+
+        .search {
+            margin-top: 22px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin: 18px 0;
+        }
+
+        .stat {
+            width: 50%;
+            padding: 12px;
+            border: 1px solid #aaa;
+            background-color: #f7f7f7;
+            font-weight: bold;
+        }
+
+        .stat span {
+            float: right;
+            color: #4a7c59;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+        }
+
+        th,
+        td {
+            border: 1px solid #aaa;
+            padding: 9px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #dddddd;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+
+        .edit {
+            background-color: #d99a2b;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            cursor: pointer;
+        }
+
+        .delete {
+            background-color: #c94c4c;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            cursor: pointer;
+        }
+
+        .grade {
+            margin-top: 25px;
+            border-top: 1px solid #aaa;
+            padding-top: 15px;
+        }
+
+        .grade h2 {
+            margin-bottom: 10px;
+        }
+
+        .grade li {
+            margin: 6px 0;
+        }
+
+        @media (max-width: 700px) {
+            .form {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+
+            .stat {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Student Management System</h1>
+
+    <!-- Student Form -->
+    <form id="studentForm">
+
+        <div class="form">
+
+            <div>
+                <label>Student Name</label>
+                <input
+                    type="text"
+                    id="name"
+                    placeholder="Enter student name"
+                    required
+                >
+            </div>
+
+            <div>
+                <label>Roll No.</label>
+                <input
+                    type="text"
+                    id="roll"
+                    placeholder="Enter roll number"
+                    required
+                >
+            </div>
+
+            <div>
+                <label>Course</label>
+
+                <select id="course" required>
+                    <option value="">Select Course</option>
+                    <option>B.Tech CSE</option>
+                    <option>B.Tech IT</option>
+                    <option>BCA</option>
+                    <option>MCA</option>
+                    <option>B.Tech AI/ML</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Marks</label>
+
+                <input
+                    type="number"
+                    id="marks"
+                    min="0"
+                    max="100"
+                    placeholder="0 - 100"
+                    required
+                >
+            </div>
+
+            <div class="full">
+                <button id="addBtn" type="submit">
+                    Add Student
+                </button>
+            </div>
+
+        </div>
+
+    </form>
+
+
+    <!-- Search -->
+    <div class="search">
+
+        <label>Search by Name or Roll No.</label>
+
+        <input
+            type="text"
+            id="search"
+            placeholder="Search student..."
+        >
+
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="stats">
+
+        <div class="stat">
+            Total Students:
+            <span id="total">0</span>
+        </div>
+
+        <div class="stat">
+            Average Marks:
+            <span id="average">0</span>
+        </div>
+
+    </div>
+
+
+    <!-- Student Table -->
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Roll No.</th>
+                <th>Name</th>
+                <th>Course</th>
+                <th>Marks</th>
+                <th>Grade</th>
+                <th>Actions</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="studentTable">
+
+        </tbody>
+
+    </table>
+
+
+    <!-- Grade System -->
+    
+
+</div>
+
+
+<script>
+
+    let students = [];
+
+    const form = document.getElementById("studentForm");
+    const table = document.getElementById("studentTable");
+    const search = document.getElementById("search");
+
+    const total = document.getElementById("total");
+    const average = document.getElementById("average");
+
+
+    // Function to calculate grade
+    function getGrade(marks) {
+
+        if (marks >= 90) {
+            return "A+";
+        }
+        else if (marks >= 85) {
+            return "A";
+        }
+        else if (marks >= 80) {
+            return "B+";
+        }
+        else if (marks >= 70) {
+            return "B";
+        }
+        else if (marks >= 60) {
+            return "C+";
+        }
+        else if (marks >= 50) {
+            return "C";
+        }
+        else {
+            return "F";
+        }
+
+    }
+
+
+    // Add Student
+    form.addEventListener("submit", function(event) {
+
+        event.preventDefault();
+
+        const name = document.getElementById("name").value;
+        const roll = document.getElementById("roll").value;
+        const course = document.getElementById("course").value;
+        const marks = Number(document.getElementById("marks").value);
+
+
+        const student = {
+            name: name,
+            roll: roll,
+            course: course,
+            marks: marks
+        };
+
+
+        students.push(student);
+
+        displayStudents(students);
+
+        updateStats();
+
+        form.reset();
+
+    });
+
+
+    // Display students in table
+    function displayStudents(studentList) {
+
+        table.innerHTML = "";
+
+        studentList.forEach(function(student, index) {
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${student.roll}</td>
+                <td>${student.name}</td>
+                <td>${student.course}</td>
+                <td>${student.marks}</td>
+                <td>${getGrade(student.marks)}</td>
+
+                <td>
+                    <button class="edit" onclick="editStudent(${index})">
+                        Edit
+                    </button>
+
+                    <button class="delete" onclick="deleteStudent(${index})">
+                        Delete
+                    </button>
+                </td>
+            `;
+
+            table.appendChild(row);
+
+        });
+
+    }
+
+
+    // Search student
+    search.addEventListener("input", function() {
+
+        const searchValue = search.value.toLowerCase();
+
+        const filteredStudents = students.filter(function(student) {
+
+            return (
+                student.name.toLowerCase().includes(searchValue) ||
+                student.roll.toLowerCase().includes(searchValue)
+            );
+
+        });
+
+
+        displayStudents(filteredStudents);
+
+    });
+
+
+    // Update statistics
+    function updateStats() {
+
+        total.textContent = students.length;
+
+
+        if (students.length === 0) {
+
+            average.textContent = "0";
+            return;
+
+        }
+
+
+        let sum = 0;
+
+        students.forEach(function(student) {
+
+            sum += student.marks;
+
+        });
+
+
+        const avg = sum / students.length;
+
+        average.textContent = avg.toFixed(2);
+
+    }
+
+
+    // Delete student
+    function deleteStudent(index) {
+
+        students.splice(index, 1);
+
+        displayStudents(students);
+
+        updateStats();
+
+    }
+
+
+    // Edit student
+    function editStudent(index) {
+
+        const student = students[index];
+
+
+        document.getElementById("name").value = student.name;
+
+        document.getElementById("roll").value = student.roll;
+
+        document.getElementById("course").value = student.course;
+
+        document.getElementById("marks").value = student.marks;
+
+
+        students.splice(index, 1);
+
+        displayStudents(students);
+
+        updateStats();
+
+    }
+
+</script>
+
+</body>
+</html>
+
